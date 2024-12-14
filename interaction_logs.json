@@ -1,0 +1,93 @@
+[
+    {
+        "timestamp": "2024-12-14T18:33:06.286304",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:06.565970",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:06.736005",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:06.928137",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:06.931669",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:09.624278",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/login",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:09.652488",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/login",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:09.677176",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/login",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:09.692113",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/login",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:25.598393",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:26.081548",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:29.058649",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/search?q=cvcx&sca_esv=34c392c06e886eba&source=hp&ei=dc9dZ9ihHvmJvr0PhKgo&iflsig=AL9hbdgAAAAAZ13dhTd_cQm2YHNrq4MERLxA21mfsjpP&oq=cvcx&gs_lp=Egdnd3Mtd2l6IgRjdmN4KgIIADIFEAAYgAQyBRAAGIAEMgcQABiABBgKMgoQABiABBixAxgKMhAQLhiABBixAxjRAxjHARgKMgoQABiABBixAxgKMgcQABiABBgKMg0QLhiABBjHARgKGK8BMgoQABiABBixAxgKMgcQABiABBgKSJ0PUABY_AFwAHgAkAEAmAH7AaABkQaqAQUwLjMuMbgBAcgBAPgBAZgCBKACnQbCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIREC4YgAQYsQMY0QMYgwEYxwHCAg4QABiABBixAxiDARiKBcICBRAuGIAEwgIIEC4YgAQYsQPCAg4QLhiABBixAxiDARiKBcICCxAuGIAEGMcBGK8BwgIOEC4YgAQYsQMY0QMYxwGYAwCSBwUwLjIuMqAH9iQ&sclient=gws-wiz",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-14T18:33:29.475459",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/search?q=cvcx&sca_esv=34c392c06e886eba&source=hp&ei=dc9dZ9ihHvmJvr0PhKgo&iflsig=AL9hbdgAAAAAZ13dhTd_cQm2YHNrq4MERLxA21mfsjpP&oq=cvcx&gs_lp=Egdnd3Mtd2l6IgRjdmN4KgIIADIFEAAYgAQyBRAAGIAEMgcQABiABBgKMgoQABiABBixAxgKMhAQLhiABBixAxjRAxjHARgKMgoQABiABBixAxgKMgcQABiABBgKMg0QLhiABBjHARgKGK8BMgoQABiABBixAxgKMgcQABiABBgKSJ0PUABY_AFwAHgAkAEAmAH7AaABkQaqAQUwLjMuMbgBAcgBAPgBAZgCBKACnQbCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIREC4YgAQYsQMY0QMYgwEYxwHCAg4QABiABBixAxiDARiKBcICBRAuGIAEwgIIEC4YgAQYsQPCAg4QLhiABBixAxiDARiKBcICCxAuGIAEGMcBGK8BwgIOEC4YgAQYsQMY0QMYxwGYAwCSBwUwLjIuMqAH9iQ&sclient=gws-wiz",
+        "value": null
+    }
+]
