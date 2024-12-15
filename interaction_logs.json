@@ -1,93 +1,107 @@
 [
     {
-        "timestamp": "2024-12-14T18:33:06.286304",
+        "timestamp": "2024-12-15T04:41:59.549568",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:06.565970",
+        "timestamp": "2024-12-15T04:41:59.834773",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:06.736005",
+        "timestamp": "2024-12-15T04:41:59.930042",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:06.928137",
+        "timestamp": "2024-12-15T04:42:00.066719",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:06.931669",
+        "timestamp": "2024-12-15T04:42:00.068909",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com",
+        "url": "http://github.com",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:09.624278",
+        "timestamp": "2024-12-15T04:42:03.908358",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:09.652488",
+        "timestamp": "2024-12-15T04:42:03.944743",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:09.677176",
+        "timestamp": "2024-12-15T04:42:03.974245",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:09.692113",
+        "timestamp": "2024-12-15T04:42:03.986480",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:25.598393",
+        "timestamp": "2024-12-15T04:42:08.848214",
         "action": "navigate",
         "target": null,
-        "url": "https://www.google.com/",
+        "url": "https://github.com/login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:26.081548",
+        "timestamp": "2024-12-15T04:42:08.864021",
         "action": "navigate",
         "target": null,
-        "url": "https://www.google.com/",
+        "url": "https://github.com/login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:29.058649",
+        "timestamp": "2024-12-15T04:42:09.158357",
         "action": "navigate",
         "target": null,
-        "url": "https://www.google.com/search?q=cvcx&sca_esv=34c392c06e886eba&source=hp&ei=dc9dZ9ihHvmJvr0PhKgo&iflsig=AL9hbdgAAAAAZ13dhTd_cQm2YHNrq4MERLxA21mfsjpP&oq=cvcx&gs_lp=Egdnd3Mtd2l6IgRjdmN4KgIIADIFEAAYgAQyBRAAGIAEMgcQABiABBgKMgoQABiABBixAxgKMhAQLhiABBixAxjRAxjHARgKMgoQABiABBixAxgKMgcQABiABBgKMg0QLhiABBjHARgKGK8BMgoQABiABBixAxgKMgcQABiABBgKSJ0PUABY_AFwAHgAkAEAmAH7AaABkQaqAQUwLjMuMbgBAcgBAPgBAZgCBKACnQbCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIREC4YgAQYsQMY0QMYgwEYxwHCAg4QABiABBixAxiDARiKBcICBRAuGIAEwgIIEC4YgAQYsQPCAg4QLhiABBixAxiDARiKBcICCxAuGIAEGMcBGK8BwgIOEC4YgAQYsQMY0QMYxwGYAwCSBwUwLjIuMqAH9iQ&sclient=gws-wiz",
+        "url": "https://github.com/signup?source=login",
         "value": null
     },
     {
-        "timestamp": "2024-12-14T18:33:29.475459",
+        "timestamp": "2024-12-15T04:42:09.208118",
         "action": "navigate",
         "target": null,
-        "url": "https://www.google.com/search?q=cvcx&sca_esv=34c392c06e886eba&source=hp&ei=dc9dZ9ihHvmJvr0PhKgo&iflsig=AL9hbdgAAAAAZ13dhTd_cQm2YHNrq4MERLxA21mfsjpP&oq=cvcx&gs_lp=Egdnd3Mtd2l6IgRjdmN4KgIIADIFEAAYgAQyBRAAGIAEMgcQABiABBgKMgoQABiABBixAxgKMhAQLhiABBixAxjRAxjHARgKMgoQABiABBixAxgKMgcQABiABBgKMg0QLhiABBjHARgKGK8BMgoQABiABBixAxgKMgcQABiABBgKSJ0PUABY_AFwAHgAkAEAmAH7AaABkQaqAQUwLjMuMbgBAcgBAPgBAZgCBKACnQbCAggQABiABBixA8ICCxAAGIAEGLEDGIMBwgIREC4YgAQYsQMY0QMYgwEYxwHCAg4QABiABBixAxiDARiKBcICBRAuGIAEwgIIEC4YgAQYsQPCAg4QLhiABBixAxiDARiKBcICCxAuGIAEGMcBGK8BwgIOEC4YgAQYsQMY0QMYxwGYAwCSBwUwLjIuMqAH9iQ&sclient=gws-wiz",
+        "url": "https://github.com/signup?source=login",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:42:09.210587",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/signup?source=login",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:42:09.218732",
+        "action": "navigate",
+        "target": null,
+        "url": "https://github.com/signup?source=login",
         "value": null
     }
 ]

@@ -3,7 +3,7 @@ import json
 import os
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton,
-    QTextEdit, QLabel, QComboBox, QScrollArea, QFrame
+    QTextEdit, QLabel, QComboBox, QScrollArea, QFrame, QSpinBox
 )
 from PyQt5.QtCore import pyqtSignal, QObject, Qt
 from PyQt5.QtGui import QPixmap
@@ -52,6 +52,14 @@ class MainApp(QMainWindow):
         self.input_prompt = QTextEdit()
         self.input_prompt.setPlaceholderText("Enter starting URL (e.g., https://example.com)...")
         layout.addWidget(self.input_prompt)
+
+        # Replay Speed Input
+        self.replay_speed_label = QLabel("Replay Speed (seconds):")
+        layout.addWidget(self.replay_speed_label)
+        self.replay_speed_input = QSpinBox()
+        self.replay_speed_input.setRange(1, 10)  # Replay delay range: 1 to 10 seconds
+        self.replay_speed_input.setValue(2)  # Default value
+        layout.addWidget(self.replay_speed_input)
 
         # Buttons
         self.start_button = QPushButton("Start")
@@ -108,12 +116,10 @@ class MainApp(QMainWindow):
         asyncio.ensure_future(self.async_replay_interactions())
 
     def update_log(self, message):
-        print(f"Log: {message}")  # Debug: Print to console
         self.log_area.append(message)
 
     def add_screenshot(self, path):
         """Add a screenshot to the scroll area."""
-        print(f"Adding screenshot: {path}")  # Debug: Print screenshot path
         pixmap = QPixmap(path)
         screenshot_label = QLabel()
         screenshot_label.setPixmap(pixmap)
@@ -140,6 +146,7 @@ class MainApp(QMainWindow):
                 await page.goto(start_url)
                 self.log_interaction("navigate", None, start_url)
                 self.signals.log_signal.emit(f"Navigated to {start_url}")
+                await self.take_screenshot(page, "Initial Navigation")
             except Exception as e:
                 self.signals.log_signal.emit(f"Error navigating to {start_url}: {e}")
 
@@ -161,24 +168,33 @@ class MainApp(QMainWindow):
             context = await browser.new_context()
             page = await context.new_page()
 
+            delay_between_actions = self.replay_speed_input.value()
+
             for log in self.logs:
                 action = log["action"]
                 target = log.get("target")
                 value = log.get("value")
                 url = log.get("url")
 
-                if action == "navigate":
-                    await page.goto(url)
-                    self.signals.log_signal.emit(f"Replayed navigation to {url}")
-                elif action == "click":
-                    await page.click(target)
-                    self.signals.log_signal.emit(f"Replayed click on {target}")
-                elif action == "input":
-                    await page.fill(target, value)
-                    self.signals.log_signal.emit(f"Replayed input '{value}' on {target}")
-                elif action == "press":
-                    await page.press(target, value)
-                    self.signals.log_signal.emit(f"Replayed key press '{value}' on {target}")
+                try:
+                    if action == "navigate":
+                        await page.goto(url)
+                        self.signals.log_signal.emit(f"Replayed navigation to {url}")
+                    elif action == "click":
+                        await page.click(target)
+                        self.signals.log_signal.emit(f"Replayed click on {target}")
+                    elif action == "input":
+                        await page.fill(target, value)
+                        self.signals.log_signal.emit(f"Replayed input '{value}' on {target}")
+                    elif action == "press":
+                        await page.press(target, value)
+                        self.signals.log_signal.emit(f"Replayed key press '{value}' on {target}")
+                    #await self.take_screenshot(page, f"After {action}")
+                except Exception as e:
+                    self.signals.log_signal.emit(f"Error during replay for action '{action}': {e}")
+
+                # Delay between actions
+                await asyncio.sleep(delay_between_actions)
 
             await browser.close()
             self.signals.log_signal.emit("Replay completed.")
@@ -222,21 +238,23 @@ class MainApp(QMainWindow):
             }
         """)
 
+    async def take_screenshot(self, page, description):
+        """Take a screenshot with a description."""
+        screenshot_path = os.path.join(self.screenshot_dir, f"screenshot_{len(self.logs)}.png")
+        try:
+            await page.screenshot(path=screenshot_path)
+            self.signals.log_signal.emit(f"Screenshot ({description}) saved: {screenshot_path}")
+            self.signals.screenshot_signal.emit(screenshot_path)
+        except Exception as e:
+            self.signals.log_signal.emit(f"Failed to capture screenshot: {e}")
+
     async def on_navigation(self, frame, page):
         """Log navigation events."""
         if frame == page.main_frame:
             url = frame.url
             self.log_interaction("navigate", None, url)
             self.signals.log_signal.emit(f"Navigated to {url}")
-
-            # Take a screenshot
-            screenshot_path = os.path.join(self.screenshot_dir, f"screenshot_{len(self.logs)}.png")
-            try:
-                if not page.is_closed():
-                    await page.screenshot(path=screenshot_path)
-                    self.signals.screenshot_signal.emit(screenshot_path)
-            except Exception as e:
-                self.signals.log_signal.emit(f"Failed to capture screenshot for {url}: {e}")
+            await self.take_screenshot(page, "Navigation")
 
     def log_interaction(self, action, target, url=None, value=None):
         """Log an interaction."""
@@ -247,7 +265,6 @@ class MainApp(QMainWindow):
             "url": url,
             "value": value
         }
-        print(f"Captured interaction: {interaction}")  # Debug: Print interaction to console
         self.logs.append(interaction)
         self.signals.log_signal.emit(f"Captured interaction: {interaction}")
 
