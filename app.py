@@ -26,6 +26,7 @@ class MainApp(QMainWindow):
         self.logs = []  # Interaction logs
         self.screenshot_dir = "screenshots"  # Directory for screenshots
         self.is_capturing = True  # Flag to control capturing
+        self._last_screenshot_time = None  # Track last screenshot timestamp
         os.makedirs(self.screenshot_dir, exist_ok=True)
 
         # Connect signals to GUI update methods
@@ -131,7 +132,18 @@ class MainApp(QMainWindow):
 
     async def async_capture_interactions(self, start_url):
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await p.chromium.launch(
+                headless=False,
+                args=[
+                    "--disable-gpu",
+                    "--disable-extensions",
+                    "--disable-background-timer-throttling",
+                    "--disable-renderer-backgrounding",
+                    "--disable-backgrounding-occluded-windows",
+                    "--enable-automation",
+                    "--start-maximized",
+                ],
+            )
             context = await browser.new_context()
             page = await context.new_page()
 
@@ -189,7 +201,6 @@ class MainApp(QMainWindow):
                     elif action == "press":
                         await page.press(target, value)
                         self.signals.log_signal.emit(f"Replayed key press '{value}' on {target}")
-                    #await self.take_screenshot(page, f"After {action}")
                 except Exception as e:
                     self.signals.log_signal.emit(f"Error during replay for action '{action}': {e}")
 
@@ -238,11 +249,19 @@ class MainApp(QMainWindow):
             }
         """)
 
-    async def take_screenshot(self, page, description):
-        """Take a screenshot with a description."""
+    async def take_screenshot(self, page, description, debounce_time=2):
+        """Take a screenshot with a debounce to avoid rapid successive captures."""
+        current_time = datetime.utcnow()
+        if self._last_screenshot_time:
+            time_since_last = (current_time - self._last_screenshot_time).total_seconds()
+            if time_since_last < debounce_time:
+                self.signals.log_signal.emit(f"Skipped screenshot due to debounce: {description}")
+                return
+
+        self._last_screenshot_time = current_time
         screenshot_path = os.path.join(self.screenshot_dir, f"screenshot_{len(self.logs)}.png")
         try:
-            await page.screenshot(path=screenshot_path)
+            await page.screenshot(path=screenshot_path, full_page=True)
             self.signals.log_signal.emit(f"Screenshot ({description}) saved: {screenshot_path}")
             self.signals.screenshot_signal.emit(screenshot_path)
         except Exception as e:

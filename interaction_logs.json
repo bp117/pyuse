@@ -1,107 +1,121 @@
 [
     {
-        "timestamp": "2024-12-15T04:41:59.549568",
+        "timestamp": "2024-12-15T04:49:13.269490",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:49:13.508199",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:49:13.999334",
+        "action": "navigate",
+        "target": null,
+        "url": "http://google.com",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:49:20.113686",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/search?q=christmas&sca_esv=a5d2f8972f3c7072&source=hp&ei=yV9eZ_7DBJu1vr0PuKyRoA8&iflsig=AL9hbdgAAAAAZ15t2SAsYtJQjgdTK7LXCA9sSepM0Bh8&oq=chris&gs_lp=Egdnd3Mtd2l6IgVjaHJpcyoCCAEyCxAAGIAEGLEDGIMBMgsQABiABBixAxiDATILEC4YgAQYsQMYgwEyCxAAGIAEGLEDGIMBMggQLhiABBixAzILEAAYgAQYsQMYgwEyCxAAGIAEGLEDGIMBMgUQABiABDILEC4YgAQYsQMYgwEyCBAAGIAEGLEDSPkgUABYhw9wAHgAkAEAmAFgoAG6A6oBATW4AQHIAQD4AQGYAgWgAtoDwgIREC4YgAQYsQMY0QMYgwEYxwHCAg4QABiABBixAxiDARiKBcICDhAuGIAEGLEDGIMBGIoFwgIFEC4YgASYAwCSBwM0LjGgB6cx&sclient=gws-wiz",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:49:20.817870",
+        "action": "navigate",
+        "target": null,
+        "url": "https://www.google.com/search?q=christmas&sca_esv=a5d2f8972f3c7072&source=hp&ei=yV9eZ_7DBJu1vr0PuKyRoA8&iflsig=AL9hbdgAAAAAZ15t2SAsYtJQjgdTK7LXCA9sSepM0Bh8&oq=chris&gs_lp=Egdnd3Mtd2l6IgVjaHJpcyoCCAEyCxAAGIAEGLEDGIMBMgsQABiABBixAxiDATILEC4YgAQYsQMYgwEyCxAAGIAEGLEDGIMBMggQLhiABBixAzILEAAYgAQYsQMYgwEyCxAAGIAEGLEDGIMBMgUQABiABDILEC4YgAQYsQMYgwEyCBAAGIAEGLEDSPkgUABYhw9wAHgAkAEAmAFgoAG6A6oBATW4AQHIAQD4AQGYAgWgAtoDwgIREC4YgAQYsQMY0QMYgwEYxwHCAg4QABiABBixAxiDARiKBcICDhAuGIAEGLEDGIMBGIoFwgIFEC4YgASYAwCSBwM0LjGgB6cx&sclient=gws-wiz",
+        "value": null
+    },
+    {
+        "timestamp": "2024-12-15T04:49:30.863992",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:41:59.834773",
+        "timestamp": "2024-12-15T04:49:31.678178",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:41:59.930042",
+        "timestamp": "2024-12-15T04:49:31.682101",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:00.066719",
+        "timestamp": "2024-12-15T04:49:32.050319",
         "action": "navigate",
         "target": null,
         "url": "https://github.com/",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:00.068909",
+        "timestamp": "2024-12-15T04:49:40.348154",
         "action": "navigate",
         "target": null,
-        "url": "http://github.com",
+        "url": "https://github.com/features/copilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:03.908358",
+        "timestamp": "2024-12-15T04:49:40.744079",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/login",
+        "url": "https://github.com/features/copilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:03.944743",
+        "timestamp": "2024-12-15T04:49:40.748036",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/login",
+        "url": "https://github.com/features/copilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:03.974245",
+        "timestamp": "2024-12-15T04:49:41.355894",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/login",
+        "url": "https://github.com/features/copilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:03.986480",
+        "timestamp": "2024-12-15T04:49:45.325568",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/login",
+        "url": "https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Ffeatures%2Fcopilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:08.848214",
+        "timestamp": "2024-12-15T04:49:45.357655",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/login",
+        "url": "https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Ffeatures%2Fcopilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:08.864021",
+        "timestamp": "2024-12-15T04:49:45.386140",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/login",
+        "url": "https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Ffeatures%2Fcopilot",
         "value": null
     },
     {
-        "timestamp": "2024-12-15T04:42:09.158357",
+        "timestamp": "2024-12-15T04:49:45.409308",
         "action": "navigate",
         "target": null,
-        "url": "https://github.com/signup?source=login",
-        "value": null
-    },
-    {
-        "timestamp": "2024-12-15T04:42:09.208118",
-        "action": "navigate",
-        "target": null,
-        "url": "https://github.com/signup?source=login",
-        "value": null
-    },
-    {
-        "timestamp": "2024-12-15T04:42:09.210587",
-        "action": "navigate",
-        "target": null,
-        "url": "https://github.com/signup?source=login",
-        "value": null
-    },
-    {
-        "timestamp": "2024-12-15T04:42:09.218732",
-        "action": "navigate",
-        "target": null,
-        "url": "https://github.com/signup?source=login",
+        "url": "https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Ffeatures%2Fcopilot",
         "value": null
     }
 ]
