@@ -230,10 +230,11 @@ class BotWindow(QMainWindow):
 
     def show_help_dialog(self):
         QMessageBox.information(self, "Help",
-            "This chatbot uses 2 queues:\n"
-            "- userQueue: collects user messages\n"
-            "- botQueue: collects multi-step replies from the worker thread.\n"
-            "No wrapping, a horizontal scrollbar may appear if the line is too long."
+            "You can ask me tasks like:\n"
+            "- 'repair payment messages'\n"
+            "- 'validate logs'\n"
+            "- 'export data'\n"
+            "or anything else you need!"
         )
 
     def send_message(self):
