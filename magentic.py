@@ -1,8 +1,8 @@
 import sys
-import time
-import random
 import queue
 import threading
+import asyncio
+import subprocess
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QTextEdit, QPushButton, QLabel, QFrame, QScrollArea, QToolButton, QMessageBox
@@ -11,66 +11,62 @@ from PyQt5.QtCore import Qt, QUrl, QTimer, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtMultimedia import QSoundEffect
 import os
+from magentic_flow_worker import userQueue, botQueue, magentic_flow_worker  # Import the queues from external worker
 
-# -----------------------------
-# GLOBAL QUEUES
-# -----------------------------
-userQueue = queue.Queue()  # sender queue for user's messages
-botQueue = queue.Queue()   # receiver queue for bot messages
-
-# -----------------------------
-# Worker Thread (Magentic Flow)
-# This continuously processes userQueue items,
-# simulates multi-step replies with a delay,
-# and enqueues each step into botQueue.
-# -----------------------------
-def magentic_flow_worker():
+###############################################################################
+# Worker Thread Launch
+###############################################################################
+def start_magentic_flow_worker():
     """
-    Runs in a background thread, handles the 'magentic flow'.
-    Pulls user messages from userQueue,
-    simulates multi-step logic,
-    places each step's result into botQueue.
+    Launch the external worker in a background thread so our PyQt main thread is free.
     """
-    while True:
-        username, message = userQueue.get()  # block until a user msg is available
-        if message is None:
-            # If we push None as a sentinel, we can break the loop or do cleanup
-            break
+    worker_thread = threading.Thread(target=magentic_flow_worker, daemon=True)
+    worker_thread.start()
+    return worker_thread
 
-        # Simulate multi-step logic with 1 second delay per step
-        steps = [
-            f"Parsing your request: '{message}'",
-            "Validating payment details...",
-            "Repairing transaction records...",
-            "Verifying final statuses...",
-            "Payment repair completed successfully!"
-        ]
-        emoji_list = ["🤖", "💡", "🔧", "✅", "✨", "📁", "🕑"]
+###############################################################################
+# Launch Playwright Chromium in a separate thread using asyncio.run
+###############################################################################
+def spawn_playwright_chromium_in_thread(x, y, width, height):
+    """
+    Spawns a new thread that runs an asyncio event loop, launching Chromium
+    positioned at (x, y) with size (width, height).
+    """
+    def run_chromium():
+        asyncio.run(launch_chromium_on_right(x, y, width, height))
+    t = threading.Thread(target=run_chromium, daemon=True)
+    t.start()
 
-        for step in steps:
-            time.sleep(1)  # 1s delay per step
-            # Compose a single-line reply without wrapping
-            reply = f"{random.choice(emoji_list)} {step}"
-            botQueue.put(reply)  # enqueue to botQueue
+async def launch_chromium_on_right(x, y, width, height):
+    """
+    Actually run asynchronous playwright code in the new thread's event loop.
+    """
+    from playwright.async_api import async_playwright
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(
+            headless=False,
+            args=[
+                f"--window-position={x},{y}",
+                f"--window-size={width},{height}"
+            ]
+        )
+        context = await browser.new_context()
+        page = await context.new_page()
+        await page.goto("https://www.google.com")
+        # Keep the browser alive
+        while True:
+            await asyncio.sleep(0.2)
 
-# We spawn the worker thread once
-worker_thread = threading.Thread(target=magentic_flow_worker, daemon=True)
-worker_thread.start()
-
-# -----------------------------
+###############################################################################
 # ChatBubble: single-line, no wrapping
-# -----------------------------
+###############################################################################
 class ChatBubble(QWidget):
-    """
-    Left-aligned bubble with an avatar + single-line message (no wrapping).
-    """
     def __init__(self, avatar_path: str, name: str, message: str, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 5, 10, 5)
         layout.setSpacing(8)
 
-        # Avatar
         avatar_label = QLabel()
         avatar_label.setFixedSize(40, 40)
         avatar_label.setScaledContents(True)
@@ -80,19 +76,17 @@ class ChatBubble(QWidget):
         avatar_label.setPixmap(pix)
         layout.addWidget(avatar_label)
 
-        # Single-line message only
         msg_layout = QVBoxLayout()
         text_label = QLabel(message)
-        text_label.setWordWrap(False)  # no wrapping
+        text_label.setWordWrap(False)
         msg_layout.addWidget(text_label, alignment=Qt.AlignLeft)
         layout.addLayout(msg_layout)
 
-# -----------------------------
+###############################################################################
 # Multi-line Text Input with Enter-to-send (via signal)
-# -----------------------------
+###############################################################################
 class MyTextEdit(QTextEdit):
-    sendSignal = pyqtSignal()  # custom signal for "Send"
-
+    sendSignal = pyqtSignal()
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setPlaceholderText("Type a message (Press Enter to send, Shift+Enter for new line)")
@@ -100,19 +94,21 @@ class MyTextEdit(QTextEdit):
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Return, Qt.Key_Enter) and not (event.modifiers() & Qt.ShiftModifier):
-            # Press Enter (without Shift) => emit the send signal
             self.sendSignal.emit()
             event.accept()
         else:
             super().keyPressEvent(event)
 
-# -----------------------------
+###############################################################################
 # Main Chatbot Window
-# -----------------------------
+###############################################################################
 class BotWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("TachyonCrew")
+        self.setWindowTitle("Side-by-Side Chat + Chromium via External Worker")
+        # Create external worker for queues
+        self.worker_thread = start_magentic_flow_worker()
+
         # Avatars
         self.user_avatar = "user_avatar.png"
         self.bot_avatar  = "bot_avatar.png"
@@ -126,13 +122,13 @@ class BotWindow(QMainWindow):
         heading_frame.setObjectName("headingFrame")
         heading_layout = QVBoxLayout(heading_frame)
         heading_layout.setContentsMargins(10,10,10,10)
-        heading_label = QLabel("TachyonCrew")
+        heading_label = QLabel("Chat Left, Chromium Right (External Worker)")
         heading_label.setFont(QFont("Arial", 24, QFont.Bold))
         heading_label.setAlignment(Qt.AlignCenter)
         heading_layout.addWidget(heading_label)
         layout.addWidget(heading_frame, 0)
 
-        # Scroll area for chat
+        # Scroll area
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         layout.addWidget(self.scroll_area, 1)
@@ -143,26 +139,21 @@ class BotWindow(QMainWindow):
         self.chat_container.setLayout(self.chat_layout)
         self.scroll_area.setWidget(self.chat_container)
 
-        # Create a default welcome bubble
+        # Welcome bubble
         self.show_welcome_bubble()
 
         # Input row
         input_row = QHBoxLayout()
-
         self.input_field = MyTextEdit()
-        # Connect the custom signal to this window's send_message method
         self.input_field.sendSignal.connect(self.send_message)
         input_row.addWidget(self.input_field)
 
-        # Help button
         self.help_button = QToolButton()
         self.help_button.setText("?")
         self.help_button.setFixedSize(40, 40)
-        self.help_button.setToolTip("Multi-step flow using two queues (userQueue, botQueue).")
-        input_row.addWidget(self.help_button)
         self.help_button.clicked.connect(self.show_help_dialog)
+        input_row.addWidget(self.help_button)
 
-        # New Task button
         self.new_task_button = QPushButton("New Task")
         self.new_task_button.setStyleSheet("background-color: #3CB371; color: white; padding: 6px;")
         self.new_task_button.clicked.connect(self.reset_chat)
@@ -170,7 +161,6 @@ class BotWindow(QMainWindow):
 
         layout.addLayout(input_row)
 
-        # Send button
         send_layout = QHBoxLayout()
         self.send_button = QPushButton("Send")
         self.send_button.setObjectName("sendButton")
@@ -178,7 +168,6 @@ class BotWindow(QMainWindow):
         send_layout.addWidget(self.send_button)
         layout.addLayout(send_layout)
 
-        # Sound effect
         self.sound_effect = QSoundEffect()
         wav_path = "notification.wav"
         if os.path.exists(wav_path):
@@ -189,7 +178,7 @@ class BotWindow(QMainWindow):
         # QTimer to poll botQueue
         self.poll_timer = QTimer(self)
         self.poll_timer.timeout.connect(self.poll_bot_queue)
-        self.poll_timer.start(200)  # check botQueue every 200ms
+        self.poll_timer.start(200)
 
         self.setStyleSheet("""
             * {
@@ -200,7 +189,7 @@ class BotWindow(QMainWindow):
                     stop:0 #f0f0f0, stop:1 #e0e0e0);
             }
             #headingFrame {
-                background-color: #aaaaaa; /* grey heading BG */
+                background-color: #aaaaaa;
             }
             QTextEdit {
                 font-size: 20px;
@@ -221,86 +210,76 @@ class BotWindow(QMainWindow):
         """)
 
     def show_welcome_bubble(self):
-        """Show static welcome bubble."""
-        welcome_text = "👋 Hello, I'm the Magentic Flow Bot!\n✨ I can handle tasks like 'repair payment messages' and more. ✨"
-
+        welcome_text = "👋 Hello, I'm the left-side Chatbot. The external worker logic handles the 2 queues."
         bubble = ChatBubble(self.bot_avatar, "Bot", welcome_text)
-        #bubble.setMaximumWidth(int(self.width() * 0.9))
+        bubble.setMaximumWidth(int(self.width() * 0.9))
         self.chat_layout.addWidget(bubble)
 
     def show_help_dialog(self):
         QMessageBox.information(self, "Help",
-            "You can ask me tasks like:\n"
-            "- 'repair payment messages'\n"
-            "- 'validate logs'\n"
-            "- 'export data'\n"
-            "or anything else you need!"
+            "Left side: PyQt chatbot. Right side: Playwright Chromium.\n"
+            "External worker handles userQueue -> botQueue in magentic_flow_worker.py."
         )
 
     def send_message(self):
         user_text = self.input_field.toPlainText().strip()
         if not user_text:
             return
-
-        # Add user bubble
         bubble = ChatBubble(self.user_avatar, "You", user_text)
         bubble.setMaximumWidth(int(self.width() * 0.9))
         self.chat_layout.addWidget(bubble)
         self.input_field.clear()
 
-        # Put user message in userQueue
+        # Send to external worker's userQueue
         userQueue.put(("You", user_text))
 
-        # Scroll down
         self.scroll_area.verticalScrollBar().setValue(
             self.scroll_area.verticalScrollBar().maximum()
         )
 
     def poll_bot_queue(self):
-        """
-        Called every 200ms by a QTimer to check for new bot messages in botQueue.
-        If found, display them in the chat.
-        """
         while not botQueue.empty():
             msg = botQueue.get_nowait()
-            # Show a single-line bubble from Bot
             bubble = ChatBubble(self.bot_avatar, "Bot", msg)
             bubble.setMaximumWidth(int(self.width() * 0.9))
             self.chat_layout.addWidget(bubble)
-            
             if self.sound_effect:
                 self.sound_effect.play()
-
             self.scroll_area.verticalScrollBar().setValue(
                 self.scroll_area.verticalScrollBar().maximum()
             )
 
     def reset_chat(self):
-        # Clear the chat
         while self.chat_layout.count():
             item = self.chat_layout.takeAt(0)
             widget = item.widget()
             if widget:
                 widget.deleteLater()
-
-        # Show welcome bubble again
         self.show_welcome_bubble()
 
     def showEvent(self, event):
         super().showEvent(event)
         desktop = QApplication.desktop()
         screen_rect = desktop.availableGeometry(self)
-        
-        fixed_width = 900
+
+        # Place PyQt window on the left half
+        half_width = int(screen_rect.width() / 2)
         top_margin = 50
         bottom_margin = 50
         window_height = screen_rect.height() - (top_margin + bottom_margin)
-        
-        self.setGeometry(0, top_margin, fixed_width, window_height)
-        self.setFixedSize(fixed_width, window_height)
+
+        self.setGeometry(0, top_margin, half_width, window_height)
+        self.setFixedSize(half_width, window_height)
+
+        # Launch Playwright Chromium in a separate thread with an asyncio loop
+        x_right = half_width
+        y_right = top_margin
+        width_right = half_width
+        height_right = window_height
+        spawn_playwright_chromium_in_thread(x_right, y_right, width_right, height_right)
 
 ###############################
-# Main Entry
+# Main
 ###############################
 if __name__ == "__main__":
     app = QApplication(sys.argv)
