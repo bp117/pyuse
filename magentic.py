@@ -1,162 +1,308 @@
 import sys
 import time
+import random
+import queue
+import threading
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QTextEdit, QPushButton, QLabel, QFrame
+    QTextEdit, QPushButton, QLabel, QFrame, QScrollArea, QToolButton, QMessageBox
 )
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QFont, QPalette, QPixmap, QLinearGradient, QColor, QPainter, QBrush
+from PyQt5.QtCore import Qt, QUrl, QTimer, pyqtSignal
+from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtMultimedia import QSoundEffect
 import os
 
-###############################
-# Placeholder Workflow Function
-###############################
+# -----------------------------
+# GLOBAL QUEUES
+# -----------------------------
+userQueue = queue.Queue()  # sender queue for user's messages
+botQueue = queue.Queue()   # receiver queue for bot messages
 
-def run_magentic_workflow(nlp_input):
+# -----------------------------
+# Worker Thread (Magentic Flow)
+# This continuously processes userQueue items,
+# simulates multi-step replies with a delay,
+# and enqueues each step into botQueue.
+# -----------------------------
+def magentic_flow_worker():
     """
-    Simulates a series of actions for 'repair payment messages'.
-    Replace this with your actual 'magentic one framework' logic.
+    Runs in a background thread, handles the 'magentic flow'.
+    Pulls user messages from userQueue,
+    simulates multi-step logic,
+    places each step's result into botQueue.
     """
-    steps = [
-        f"Parsing your request: '{nlp_input}'",
-        "Validating payment details...",
-        "Repairing transaction records...",
-        "Verifying final statuses...",
-        "Payment repair completed successfully!"
-    ]
-    for step in steps:
-        time.sleep(1)  # simulate some processing delay
-        yield step
+    while True:
+        username, message = userQueue.get()  # block until a user msg is available
+        if message is None:
+            # If we push None as a sentinel, we can break the loop or do cleanup
+            break
 
-##################
-# Worker Thread
-##################
+        # Simulate multi-step logic with 1 second delay per step
+        steps = [
+            f"Parsing your request: '{message}'",
+            "Validating payment details...",
+            "Repairing transaction records...",
+            "Verifying final statuses...",
+            "Payment repair completed successfully!"
+        ]
+        emoji_list = ["🤖", "💡", "🔧", "✅", "✨", "📁", "🕑"]
 
-class ActionThread(QThread):
-    update_chat = pyqtSignal(str)
+        for step in steps:
+            time.sleep(1)  # 1s delay per step
+            # Compose a single-line reply without wrapping
+            reply = f"{random.choice(emoji_list)} {step}"
+            botQueue.put(reply)  # enqueue to botQueue
 
-    def __init__(self, user_input):
-        super().__init__()
-        self.user_input = user_input
+# We spawn the worker thread once
+worker_thread = threading.Thread(target=magentic_flow_worker, daemon=True)
+worker_thread.start()
 
-    def run(self):
-        # Call your utility function, yielding step-by-step messages
-        for msg in run_magentic_workflow(self.user_input):
-            self.update_chat.emit(msg)
+# -----------------------------
+# ChatBubble: single-line, no wrapping
+# -----------------------------
+class ChatBubble(QWidget):
+    """
+    Left-aligned bubble with an avatar + single-line message (no wrapping).
+    """
+    def __init__(self, avatar_path: str, name: str, message: str, parent=None):
+        super().__init__(parent)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(10, 5, 10, 5)
+        layout.setSpacing(8)
 
-########################
-# Main Window
-########################
+        # Avatar
+        avatar_label = QLabel()
+        avatar_label.setFixedSize(40, 40)
+        avatar_label.setScaledContents(True)
+        pix = QPixmap(avatar_path)
+        if not pix.isNull():
+            pix = pix.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        avatar_label.setPixmap(pix)
+        layout.addWidget(avatar_label)
 
-class FancyBotWindow(QMainWindow):
+        # Single-line message only
+        msg_layout = QVBoxLayout()
+        text_label = QLabel(message)
+        text_label.setWordWrap(False)  # no wrapping
+        msg_layout.addWidget(text_label, alignment=Qt.AlignLeft)
+        layout.addLayout(msg_layout)
+
+# -----------------------------
+# Multi-line Text Input with Enter-to-send (via signal)
+# -----------------------------
+class MyTextEdit(QTextEdit):
+    sendSignal = pyqtSignal()  # custom signal for "Send"
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setPlaceholderText("Type a message (Press Enter to send, Shift+Enter for new line)")
+        self.setFixedHeight(80)
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter) and not (event.modifiers() & Qt.ShiftModifier):
+            # Press Enter (without Shift) => emit the send signal
+            self.sendSignal.emit()
+            event.accept()
+        else:
+            super().keyPressEvent(event)
+
+# -----------------------------
+# Main Chatbot Window
+# -----------------------------
+class BotWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Magentic One Fancy Chatbot")
-        self.setGeometry(100, 100, 1500, 2000)
+        self.setWindowTitle("TachyonCrew")
+        # Avatars
+        self.user_avatar = "user_avatar.png"
+        self.bot_avatar  = "bot_avatar.png"
 
-        # Main widget and layout
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         layout = QVBoxLayout(main_widget)
 
-        # Create a heading label
-        heading_label = QLabel("Magentic One Payment Repair Chatbot")
-        heading_label.setFont(QFont("Arial", 16, QFont.Bold))
-        heading_label.setAlignment(Qt.AlignHCenter)
-        layout.addWidget(heading_label)
+        # Heading
+        heading_frame = QFrame()
+        heading_frame.setObjectName("headingFrame")
+        heading_layout = QVBoxLayout(heading_frame)
+        heading_layout.setContentsMargins(10,10,10,10)
+        heading_label = QLabel("TachyonCrew")
+        heading_label.setFont(QFont("Arial", 24, QFont.Bold))
+        heading_label.setAlignment(Qt.AlignCenter)
+        heading_layout.addWidget(heading_label)
+        layout.addWidget(heading_frame, 0)
 
-        # Chat display (read-only)
-        self.chat_display = QTextEdit()
-        self.chat_display.setReadOnly(True)
-        layout.addWidget(self.chat_display)
+        # Scroll area for chat
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        layout.addWidget(self.scroll_area, 1)
 
-        # Multi-line text area for user input
-        self.input_field = QTextEdit()
-        self.input_field.setPlaceholderText("Type your request here, e.g. 'repair payment messages'...")
-        self.input_field.setFixedHeight(80)
-        layout.addWidget(self.input_field)
+        self.chat_container = QWidget()
+        self.chat_layout = QVBoxLayout(self.chat_container)
+        self.chat_layout.setAlignment(Qt.AlignTop)
+        self.chat_container.setLayout(self.chat_layout)
+        self.scroll_area.setWidget(self.chat_container)
 
-        # Button row
-        button_layout = QHBoxLayout()
+        # Create a default welcome bubble
+        self.show_welcome_bubble()
 
+        # Input row
+        input_row = QHBoxLayout()
+
+        self.input_field = MyTextEdit()
+        # Connect the custom signal to this window's send_message method
+        self.input_field.sendSignal.connect(self.send_message)
+        input_row.addWidget(self.input_field)
+
+        # Help button
+        self.help_button = QToolButton()
+        self.help_button.setText("?")
+        self.help_button.setFixedSize(40, 40)
+        self.help_button.setToolTip("Multi-step flow using two queues (userQueue, botQueue).")
+        input_row.addWidget(self.help_button)
+        self.help_button.clicked.connect(self.show_help_dialog)
+
+        # New Task button
+        self.new_task_button = QPushButton("New Task")
+        self.new_task_button.setStyleSheet("background-color: #3CB371; color: white; padding: 6px;")
+        self.new_task_button.clicked.connect(self.reset_chat)
+        input_row.addWidget(self.new_task_button)
+
+        layout.addLayout(input_row)
+
+        # Send button
+        send_layout = QHBoxLayout()
         self.send_button = QPushButton("Send")
+        self.send_button.setObjectName("sendButton")
         self.send_button.clicked.connect(self.send_message)
-        button_layout.addWidget(self.send_button)
+        send_layout.addWidget(self.send_button)
+        layout.addLayout(send_layout)
 
-        layout.addLayout(button_layout)
+        # Sound effect
+        self.sound_effect = QSoundEffect()
+        wav_path = "notification.wav"
+        if os.path.exists(wav_path):
+            self.sound_effect.setSource(QUrl.fromLocalFile(wav_path))
+        else:
+            self.sound_effect = None
 
-        self.bot_thread = None
-
-        # Apply a fancy style sheet
-        self.apply_fancy_styles()
-
-    def apply_fancy_styles(self):
-        """
-        Applies a style sheet with a gradient background, styled buttons,
-        and larger fonts. Adjust colors as desired.
-        """
+        # QTimer to poll botQueue
+        self.poll_timer = QTimer(self)
+        self.poll_timer.timeout.connect(self.poll_bot_queue)
+        self.poll_timer.start(200)  # check botQueue every 200ms
 
         self.setStyleSheet("""
+            * {
+                font-size: 20px;
+            }
             QMainWindow {
-                background-color: #f0f0f0;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #f0f0f0, stop:1 #e0e0e0);
             }
-            QLabel {
-                color: #333;
-            }
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-size: 30px;
-                padding: 8px 16px;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
+            #headingFrame {
+                background-color: #aaaaaa; /* grey heading BG */
             }
             QTextEdit {
-                font-size: 30px;
-                border: 2px solid #ccc;
-                border-radius: 4px;
+                font-size: 20px;
+            }
+            QPushButton {
+                font-size: 20px;
+                color: white;
+                background-color: #2E8B57;
+                border-radius: 8px;
                 padding: 6px;
-                background-color: #ffffff;
+            }
+            QPushButton#sendButton {
+                background-color: #008CBA;
+            }
+            QPushButton:hover {
+                opacity: 0.8;
             }
         """)
 
-        # Alternatively, create a gradient palette for the main window background:
-        palette = self.palette()
-        gradient = QLinearGradient(0, 0, 0, self.height())
-        gradient.setColorAt(0.0, QColor("#cfd9df"))  # top color
-        gradient.setColorAt(1.0, QColor("#e2ebf0"))  # bottom color
-        palette.setBrush(QPalette.Window, QBrush(gradient))
-        self.setPalette(palette)
+    def show_welcome_bubble(self):
+        """Show static welcome bubble."""
+        welcome_text = "👋 Hello, I'm the Magentic Flow Bot!\n✨ I can handle tasks like 'repair payment messages' and more. ✨"
+
+        bubble = ChatBubble(self.bot_avatar, "Bot", welcome_text)
+        #bubble.setMaximumWidth(int(self.width() * 0.9))
+        self.chat_layout.addWidget(bubble)
+
+    def show_help_dialog(self):
+        QMessageBox.information(self, "Help",
+            "This chatbot uses 2 queues:\n"
+            "- userQueue: collects user messages\n"
+            "- botQueue: collects multi-step replies from the worker thread.\n"
+            "No wrapping, a horizontal scrollbar may appear if the line is too long."
+        )
 
     def send_message(self):
         user_text = self.input_field.toPlainText().strip()
         if not user_text:
             return
 
-        # Display user's message in chat
-        self.chat_display.append(f"<span style='color: blue; font-weight: bold;'>You:</span> {user_text}")
+        # Add user bubble
+        bubble = ChatBubble(self.user_avatar, "You", user_text)
+        bubble.setMaximumWidth(int(self.width() * 0.9))
+        self.chat_layout.addWidget(bubble)
         self.input_field.clear()
 
-        # Create worker thread to run the "magentic" logic
-        self.bot_thread = ActionThread(user_text)
-        self.bot_thread.update_chat.connect(self.show_bot_message)
-        self.bot_thread.start()
+        # Put user message in userQueue
+        userQueue.put(("You", user_text))
 
-    def show_bot_message(self, message):
+        # Scroll down
+        self.scroll_area.verticalScrollBar().setValue(
+            self.scroll_area.verticalScrollBar().maximum()
+        )
+
+    def poll_bot_queue(self):
         """
-        Called by worker thread for each partial result from the workflow.
+        Called every 200ms by a QTimer to check for new bot messages in botQueue.
+        If found, display them in the chat.
         """
-        self.chat_display.append(f"<span style='color: darkgreen; font-weight: bold;'>Bot:</span> {message}")
+        while not botQueue.empty():
+            msg = botQueue.get_nowait()
+            # Show a single-line bubble from Bot
+            bubble = ChatBubble(self.bot_avatar, "Bot", msg)
+            bubble.setMaximumWidth(int(self.width() * 0.9))
+            self.chat_layout.addWidget(bubble)
+            
+            if self.sound_effect:
+                self.sound_effect.play()
 
+            self.scroll_area.verticalScrollBar().setValue(
+                self.scroll_area.verticalScrollBar().maximum()
+            )
 
-#######################
-# Main Entry Point
-#######################
+    def reset_chat(self):
+        # Clear the chat
+        while self.chat_layout.count():
+            item = self.chat_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
 
+        # Show welcome bubble again
+        self.show_welcome_bubble()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        desktop = QApplication.desktop()
+        screen_rect = desktop.availableGeometry(self)
+        
+        fixed_width = 900
+        top_margin = 50
+        bottom_margin = 50
+        window_height = screen_rect.height() - (top_margin + bottom_margin)
+        
+        self.setGeometry(0, top_margin, fixed_width, window_height)
+        self.setFixedSize(fixed_width, window_height)
+
+###############################
+# Main Entry
+###############################
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = FancyBotWindow()
+    window = BotWindow()
     window.show()
     sys.exit(app.exec_())
