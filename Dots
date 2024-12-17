@@ -1,0 +1,104 @@
+class BotWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Chat Bot")
+        self.setFixedWidth(600)
+        self.worker_thread = start_magentic_flow_worker()
+        self.user_avatar = "user_avatar.png"
+        self.bot_avatar = "bot_avatar.png"
+
+        # Chat UI setup
+        main_widget = QWidget()
+        self.setCentralWidget(main_widget)
+        layout = QVBoxLayout(main_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        layout.addWidget(self.scroll_area)
+
+        self.chat_container = QWidget()
+        self.chat_layout = QVBoxLayout(self.chat_container)
+        self.chat_layout.setAlignment(Qt.AlignTop)
+        self.scroll_area.setWidget(self.chat_container)
+
+        self.loading_widget = None  # Track the LoadingDots widget
+        self.processing_bot_messages = False  # Track message processing state
+
+        self.show_welcome_bubble()
+
+        # Input row
+        input_row = QHBoxLayout()
+        self.input_field = QTextEdit()
+        self.input_field.setFixedHeight(80)
+        input_row.addWidget(self.input_field)
+
+        self.send_button = QPushButton("Send")
+        self.send_button.clicked.connect(self.send_message)
+        input_row.addWidget(self.send_button)
+
+        layout.addLayout(input_row)
+
+        # Timer for polling bot queue
+        self.poll_timer = QTimer(self)
+        self.poll_timer.timeout.connect(self.poll_bot_queue)
+        self.poll_timer.start(200)
+
+    def show_welcome_bubble(self):
+        bubble = ChatBubble(self.bot_avatar, "👋 Hello! How can I assist you today?", is_bot=True)
+        self.chat_layout.addWidget(bubble)
+
+    def show_loading_dots(self):
+        """Show LoadingDots widget if not already present."""
+        if self.loading_widget is None:
+            self.loading_widget = LoadingDots()
+            self.chat_layout.addWidget(self.loading_widget)
+            self.scroll_to_bottom()
+
+    def hide_loading_dots(self):
+        """Safely remove the LoadingDots widget."""
+        if self.loading_widget:
+            self.loading_widget.deleteLater()
+            self.loading_widget = None
+
+    def send_message(self):
+        """Handle user input and restart bot message processing."""
+        user_text = self.input_field.toPlainText().strip()
+        if not user_text:
+            return
+
+        # Add user message bubble
+        bubble = ChatBubble(self.user_avatar, user_text)
+        self.chat_layout.addWidget(bubble)
+        self.input_field.clear()
+
+        # Add user message to the worker queue
+        userQueue.put(("You", user_text))
+
+        # Reset processing state and show loading dots
+        self.processing_bot_messages = True
+        self.show_loading_dots()
+
+    def poll_bot_queue(self):
+        """Poll the bot queue and display messages with loading dots between them."""
+        if self.processing_bot_messages:
+            if not botQueue.empty():
+                # Hide loading dots before showing the message
+                self.hide_loading_dots()
+
+                # Process and display the next bot message
+                msg = botQueue.get_nowait()
+                bubble = ChatBubble(self.bot_avatar, msg, is_bot=True)
+                self.chat_layout.addWidget(bubble)
+                self.scroll_to_bottom()
+
+                # Show new loading dots for next message if queue isn't empty
+                if not botQueue.empty():
+                    self.show_loading_dots()
+            elif self.loading_widget:
+                # If the queue is empty and dots are still visible, remove them
+                self.hide_loading_dots()
+                self.processing_bot_messages = False
+
+    def scroll_to_bottom(self):
+        self.scroll_area.verticalScrollBar().setValue(self.scroll_area.verticalScrollBar().maximum())
